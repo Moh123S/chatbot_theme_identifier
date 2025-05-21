@@ -1,4 +1,4 @@
-from langchain_groq import ChatGroq  # Updated import
+from langchain_groq import ChatGroq
    from langchain.prompts import PromptTemplate
    import os
 
