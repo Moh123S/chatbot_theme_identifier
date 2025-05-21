@@ -1,0 +1,11 @@
+Flask
+langchain
+langchain-groq
+pypdf2
+pytesseract
+chromadb
+transformers
+sentence-transformers
+numpy
+pillow
+python-dotenv
