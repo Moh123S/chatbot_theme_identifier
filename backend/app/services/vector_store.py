@@ -1,5 +1,5 @@
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 import os
 
 class VectorStore:
@@ -10,7 +10,7 @@ class VectorStore:
             embedding_function=self.embeddings,
             persist_directory=persist_directory
         )
-    
+       
     def add_document(self, doc_id, content):
         try:
             self.vector_store.add_texts(
@@ -18,10 +18,9 @@ class VectorStore:
                 ids=[doc_id],
                 metadatas=[{"doc_id": doc_id}]
             )
-            self.vector_store.persist()
-        except Exception as e:
+         except Exception as e:
             raise Exception(f"Error adding document {doc_id} to vector store: {str(e)}")
-    
+       
     def search(self, query, k=5):
         try:
             results = self.vector_store.similarity_search_with_score(query, k=k)

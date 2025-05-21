@@ -19,3 +19,5 @@ sentence-transformers
 transformers
 fastapi[all]
 langchain-groq
+langchain-chroma
+langchain-huggingface
