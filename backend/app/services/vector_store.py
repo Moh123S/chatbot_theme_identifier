@@ -1,4 +1,4 @@
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma  # Updated import
 from langchain_community.embeddings import HuggingFaceEmbeddings
 import os
 
