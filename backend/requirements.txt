@@ -18,3 +18,4 @@ aiofiles
 sentence-transformers
 transformers
 fastapi[all]
+langchain-groq
