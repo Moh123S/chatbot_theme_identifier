@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Research Chatbot</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Document Research Chatbot</h1>
+        
+        <!-- Document Upload Section -->
+        <div class="section">
+            <h2>Upload Documents</h2>
+            <form id="upload-form" enctype="multipart/form-data">
+                <input type="file" id="documents" name="documents" multiple accept=".pdf,.png,.jpg,.jpeg">
+                <button type="submit">Upload</button>
+            </form>
+            <div id="upload-status"></div>
+        </div>
+        
+        <!-- Document List Section -->
+        <div class="section">
+            <h2>Uploaded Documents</h2>
+            <ul id="document-list"></ul>
+        </div>
+        
+        <!-- Query Section -->
+        <div class="section">
+            <h2>Ask a Question</h2>
+            <input type="text" id="query" placeholder="Enter your question...">
+            <button onclick="submitQuery()">Submit</button>
+            <div id="query-results"></div>
+        </div>
+        
+        <!-- Theme Visualization -->
+        <div class="section">
+            <h2>Identified Themes</h2>
+            <div id="theme-visualization"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Fetch and display uploaded documents
+        async function loadDocuments() {
+            const response = await fetch('/api/documents');
+            const documents = await response.json();
+            const docList = document.getElementById('document-list');
+            docList.innerHTML = '';
+            documents.forEach(doc => {
+                const li = document.createElement('li');
+                li.textContent = doc.filename;
+                docList.appendChild(li);
+            });
+        }
+        
+        // Handle document upload
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            const files = document.getElementById('documents').files;
+            for (let file of files) {
+                formData.append('documents', file);
+            }
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            document.getElementById('upload-status').textContent = result.message;
+            loadDocuments();
+        });
+        
+        // Submit query and display results
+        async function submitQuery() {
+            const query = document.getElementById('query').value;
+            const response = await fetch('/api/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            });
+            const result = await response.json();
+            const resultsDiv = document.getElementById('query-results');
+            resultsDiv.innerHTML = `
+                <h3>Results</h3>
+                <table>
+                    <tr><th>Document ID</th><th>Extracted Answer</th><th>Citation</th></tr>
+                    ${result.responses.map(r => `
+                        <tr>
+                            <td>${r.document_id}</td>
+                            <td>${r.answer}</td>
+                            <td>${r.citation}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+                <h3>Synthesized Themes</h3>
+                <p>${result.themes.join('<br>')}</p>
+            `;
+            // Simple theme visualization (list for now)
+            const themeDiv = document.getElementById('theme-visualization');
+            themeDiv.innerHTML = `<ul>${result.themes.map(t => `<li>${t}</li>`).join('')}</ul>`;
+        }
+        
+        // Load documents on page load
+        window.onload = loadDocuments;
+    </script>
+</body>
+</html>
