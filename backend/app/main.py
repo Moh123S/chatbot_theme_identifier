@@ -1,24 +1,28 @@
-from flask import Flask
-from app.api.routes import api_bp
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from app.api.routes import router as api_router
 from dotenv import load_dotenv
 import os
 
 # Load environment variables
 load_dotenv()
 
-def create_app():
-    app = Flask(__name__, template_folder="../templates", static_folder="../static")
-    
-    # Register API blueprint
-    app.register_blueprint(api_bp, url_prefix="/api")
-    
-    # Basic route for the web interface
-    @app.route("/")
-    def index():
-        return render_template("index.html")
-    
-    return app
+app = FastAPI()
+
+# Mount static files and templates
+app.mount("/static", StaticFiles(directory="backend/static"), name="static")
+templates = Jinja2Templates(directory="backend/templates")
+
+# Include API router
+app.include_router(api_router, prefix="/api")
+
+# Serve the main web interface
+@app.get("/", response_class=HTMLResponse)
+async def index(request: fastapi.Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
