@@ -1,0 +1,17 @@
+Python
+pycache/
+*.pyc
+*.pyo
+*.pyd
+
+Environment
+.env
+data/chroma/
+data/uploads/*
+
+IDE
+.vscode/
+.idea/
+
+System
+.DS_Store
