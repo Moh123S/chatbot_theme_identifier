@@ -18,7 +18,7 @@ class VectorStore:
                 ids=[doc_id],
                 metadatas=[{"doc_id": doc_id}]
             )
-         except Exception as e:
+        except Exception as e:
             raise Exception(f"Error adding document {doc_id} to vector store: {str(e)}")
        
     def search(self, query, k=5):
