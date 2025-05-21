@@ -1,17 +1,21 @@
-Python
-pycache/
+# Python
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-Environment
+# Virtual environment
+venv/
+.venv/
+
+# Environment
 .env
 data/chroma/
 data/uploads/*
 
-IDE
+# IDE
 .vscode/
 .idea/
 
-System
+# System
 .DS_Store
