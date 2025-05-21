@@ -3,6 +3,7 @@ from app.services.vector_store import VectorStore
 from app.models.document import Document
 import os
 import uuid
+import aiofiles
 
 class DocumentProcessor:
     def __init__(self):
@@ -11,12 +12,16 @@ class DocumentProcessor:
         os.makedirs(self.upload_dir, exist_ok=True)
         self.documents = {}
     
-    def process_document(self, file):
+    async def process_document(self, file):
         try:
             doc_id = str(uuid.uuid4())
             filename = file.filename
             file_path = os.path.join(self.upload_dir, filename)
-            file.save(file_path)
+            
+            # Save file asynchronously
+            async with aiofiles.open(file_path, 'wb') as out_file:
+                content = await file.read()
+                await out_file.write(content)
             
             content = extract_text(file_path)
             doc = Document(doc_id, filename, content)
