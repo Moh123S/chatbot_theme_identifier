@@ -1,38 +1,40 @@
-from flask import Blueprint, request, jsonify, render_template
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from app.core.document_processor import DocumentProcessor
 from app.core.query_processor import QueryProcessor
 from app.core.theme_identifier import ThemeIdentifier
 
-api_bp = Blueprint("api", __name__)
+router = APIRouter()
 document_processor = DocumentProcessor()
 query_processor = QueryProcessor()
 theme_identifier = ThemeIdentifier()
 
-@api_bp.route("/upload", methods=["POST"])
-def upload_documents():
-    try:
-        files = request.files.getlist("documents")
-        for file in files:
-            document_processor.process_document(file)
-        return jsonify({"message": "Documents uploaded successfully"})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+class QueryRequest(BaseModel):
+    query: str
 
-@api_bp.route("/documents", methods=["GET"])
-def get_documents():
+@router.post("/upload")
+async def upload_documents(documents: list[UploadFile] = File(...)):
+    try:
+        for file in documents:
+            await document_processor.process_document(file)
+        return JSONResponse(content={"message": "Documents uploaded successfully"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/documents")
+async def get_documents():
     try:
         documents = document_processor.get_all_documents()
-        return jsonify([{"doc_id": doc.doc_id, "filename": doc.filename} for doc in documents])
+        return [{"doc_id": doc.doc_id, "filename": doc.filename} for doc in documents]
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
 
-@api_bp.route("/query", methods=["POST"])
-def query_documents():
+@router.post("/query")
+async def query_documents(request: QueryRequest):
     try:
-        data = request.get_json()
-        query = data.get("query", "")
-        responses = query_processor.process_query(query)
-        themes = theme_identifier.identify_themes(responses)
-        return jsonify({"responses": responses, "themes": themes})
+        responses = await query_processor.process_query(request.query)
+        themes = await theme_identifier.identify_themes(responses)
+        return {"responses": responses, "themes": themes}
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
