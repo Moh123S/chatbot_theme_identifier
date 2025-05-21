@@ -1,4 +1,4 @@
-from langchain_groq import ChatGroq
+from langchain_community.chat_models import ChatGroq
 from langchain.prompts import PromptTemplate
 from app.services.vector_store import VectorStore
 import os
@@ -15,16 +15,15 @@ class QueryProcessor:
             template="Given the following document content:\n{context}\n\nAnswer the query: {query}\nProvide a concise answer and cite the specific paragraph or page if possible."
         )
     
-    def process_query(self, query):
+    async def process_query(self, query):
         try:
-            # Search for relevant documents
             results = self.vector_store.search(query, k=5)
             responses = []
             
             for doc, score in results:
                 context = doc.page_content
                 prompt = self.prompt_template.format(context=context, query=query)
-                response = self.llm.invoke(prompt)
+                response = await self.llm.ainvoke(prompt)
                 answer = response.content
                 citation = f"Document {doc.metadata['doc_id']}, Page {context.split('[Page')[1].split(']')[0]}"
                 responses.append({
