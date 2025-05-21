@@ -1,4 +1,4 @@
-from langchain_groq import ChatGroq
+from langchain_community.chat_models import ChatGroq
 from langchain.prompts import PromptTemplate
 import os
 
@@ -13,11 +13,11 @@ class ThemeIdentifier:
             template="Given the following document responses:\n{responses}\n\nIdentify common themes across these responses. Provide a list of themes with supporting document IDs."
         )
     
-    def identify_themes(self, responses):
+    async def identify_themes(self, responses):
         try:
             response_text = "\n".join([f"Doc {r['document_id']}: {r['answer']}" for r in responses])
             prompt = self.prompt_template.format(responses=response_text)
-            result = self.llm.invoke(prompt)
+            result = await self.llm.ainvoke(prompt)
             themes = result.content.split("\n")
             return [theme.strip() for theme in themes if theme.strip()]
         except Exception as e:
