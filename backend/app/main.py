@@ -1,34 +1,39 @@
 import sys
-   import os
-   from pathlib import Path
+import os
+from pathlib import Path
 
-   # Add backend directory to Python path
-   sys.path.append(str(Path(__file__).parent.parent))
+# Debug: Print Python path and current directory
+print("Python path:", sys.path)
+print("Current directory:", os.getcwd())
+print("GROQ_API_KEY:", os.getenv("GROQ_API_KEY"))
 
-   from fastapi import FastAPI
-   from fastapi.staticfiles import StaticFiles
-   from fastapi.templating import Jinja2Templates
-   from fastapi.responses import HTMLResponse
-   from app.api.routes import router as api_router
-   from dotenv import load_dotenv
+# Add backend directory to Python path
+sys.path.append(str(Path(__file__).parent.parent))
 
-   # Load environment variables
-   load_dotenv()
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from app.api.routes import router as api_router
+from dotenv import load_dotenv
 
-   app = FastAPI()
+# Load environment variables
+load_dotenv()
 
-   # Mount static files and templates
-   app.mount("/static", StaticFiles(directory="backend/static"), name="static")
-   templates = Jinja2Templates(directory="backend/templates")
+app = FastAPI()
 
-   # Include API router
-   app.include_router(api_router, prefix="/api")
+# Mount static files and templates
+app.mount("/static", StaticFiles(directory="backend/static"), name="static")
+templates = Jinja2Templates(directory="backend/templates")
 
-   # Serve the main web interface
-   @app.get("/", response_class=HTMLResponse)
-   async def index(request: fastapi.Request):
-       return templates.TemplateResponse("index.html", {"request": request})
+# Include API router
+app.include_router(api_router, prefix="/api")
 
-   if __name__ == "__main__":
-       import uvicorn
-       uvicorn.run(app, host="0.0.0.0", port=8000)
+# Serve the main web interface
+@app.get("/", response_class=HTMLResponse)
+async def index(request: fastapi.Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
