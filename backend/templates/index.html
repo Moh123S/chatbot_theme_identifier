@@ -37,10 +37,11 @@
         <!-- Theme Visualization -->
         <div class="section">
             <h2>Identified Themes</h2>
-            <div id="theme-visualization"></div>
+            <canvas id="theme-chart" width="400" height="200"></canvas>
         </div>
     </div>
     
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Fetch and display uploaded documents
         async function loadDocuments() {
@@ -97,9 +98,32 @@
                 <h3>Synthesized Themes</h3>
                 <p>${result.themes.join('<br>')}</p>
             `;
-            // Simple theme visualization (list for now)
-            const themeDiv = document.getElementById('theme-visualization');
-            themeDiv.innerHTML = `<ul>${result.themes.map(t => `<li>${t}</li>`).join('')}</ul>`;
+            // Theme visualization with Chart.js
+            const ctx = document.getElementById('theme-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: result.themes,
+                    datasets: [{
+                        label: 'Themes Identified',
+                        data: result.themes.map(() => 1), // Equal weight for simplicity
+                        backgroundColor: ['#007bff', '#28a745', '#dc3545', '#ffc107'],
+                        borderColor: ['#0056b3', '#218838', '#c82333', '#e0a800'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
         }
         
         // Load documents on page load
